@@ -17,6 +17,7 @@ import org.springframework.web.context.request.WebRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ArtifactController {
@@ -31,16 +32,19 @@ public class ArtifactController {
         String name = StringUtils.substring(uri, "/api/artifact/".length());
         LOG.info("get artifact object: {}", name);
 
+        // 获取子目录
         List<Entity> entities = artifactService.getChildren(name);
         if (entities != null) {
             return new ResponseEntity<>(entities, HttpStatus.OK);
         }
 
+        // 获取制品
         Artifact artifact = artifactService.getArtifact(name);
         if (artifact != null) {
             return new ResponseEntity<>(artifact, HttpStatus.OK);
         }
 
+        // 获取制品版本
         String version = StringUtils.substringAfterLast(name, "/");
         name = StringUtils.substringBeforeLast(name, "/");
         List<Version> versions = artifactService.getVersions(name, version);
@@ -48,6 +52,7 @@ public class ArtifactController {
             return new ResponseEntity<>(versions, HttpStatus.OK);
         }
 
+        // 获取类别
         String classification = version;
         version = StringUtils.substringAfterLast(name, "/");
         name = StringUtils.substringBeforeLast(name, "/");
@@ -56,15 +61,35 @@ public class ArtifactController {
             return new ResponseEntity<>(v, HttpStatus.OK);
         }
 
+        // 返回404
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PostMapping("/api/artifact/**")
-    public String postArtifactObject(ServletWebRequest request, @RequestBody Object body) {
+    public ResponseEntity<Entity> postArtifactObject(ServletWebRequest request, @RequestBody Object body) throws IOException {
         String uri = request.getRequest().getRequestURI();
         String name = StringUtils.substring(uri, "/api/artifact/".length());
         LOG.info("post artifact object: {}", name);
-        return null;
+
+        // 添加目录
+        List<Entity> entities = artifactService.getChildren(name);
+        if (entities != null && body instanceof String) {
+            //TODO
+        }
+
+        // 添加制品
+        if (entities != null && body instanceof Map) {
+            //TODO
+        }
+
+        // 添加版本
+        Artifact artifact = artifactService.getArtifact(name);
+        if (artifact != null) {
+            //TODO
+        }
+
+        // 返回404
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PutMapping("/api/artifact/**")

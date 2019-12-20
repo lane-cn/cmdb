@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -22,12 +23,17 @@ import java.util.List;
 @Service
 public class ArtifactService {
     protected static final Logger LOG = LoggerFactory.getLogger(ArtifactService.class);
-    private String storeDirectory;
     private File artifactoryPath = null;
 
+    @Value("${store.directory}")
+    private String storeDirectory;
+
     @PostConstruct
-    public void init() {
+    public void init() throws IOException {
         artifactoryPath = new File(new File(storeDirectory), "artifactory");
+        if (!artifactoryPath.exists()) {
+            FileUtils.forceMkdir(artifactoryPath);
+        }
     }
 
     public List<Entity> getChildren(String name) {
