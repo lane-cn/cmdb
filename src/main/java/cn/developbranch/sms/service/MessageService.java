@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import cn.developbranch.sms.domain.Message;
+import cn.developbranch.sms.util.StringUtils;
 
 @Service
 public class MessageService {
@@ -24,16 +25,22 @@ public class MessageService {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	
-	public void putMessage(Message message) {
+	public String putMessage(Message message) {
+		String time = FORMAT.get().format(message.getTimestamp());
+		String id = String.format("%s#%s#%s", message.getFrom(), time, message.getSentTo());
+		id = StringUtils.md5sum(id);
+		
 		String sql = "REPLACE INTO `sms` (`message_id`,`device_id`,`sent_to`,`from`,`secret`,`message`,`sent_timestamp`) VALUES (?,?,?,?,?,?,?)";
 		int i = jdbcTemplate.update(sql, 
-				message.getId(), 
+				id, 
 				message.getDeviceId(), 
 				message.getSentTo(), 
 				message.getFrom(), 
 				message.getSecret(), 
 				message.getMessage(), 
-				FORMAT.get().format(message.getTimestamp()));
+				time);
 		LOG.debug("insert data: {}", i);
+		return id;
 	}
+	
 }

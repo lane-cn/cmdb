@@ -42,7 +42,6 @@ public class ApiController {
 		msg.setSentTo(sentTo);
 		msg.setTimestamp(new Date(sentTimestamp));
 		
-		messageService.putMessage(msg);
-		return messageId;
+		return messageService.putMessage(msg);
 	}
 }
